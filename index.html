@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ЕГЭ Обществознание – Тренажер методов познания</title>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #10b981;
+      --error: #ef4444;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      
+      /* Цвета зон */
+      --color-theory: #8b5cf6;   /* Фиолетовый */
+      --color-practice: #10b981; /* Зеленый */
+      
+      --bg-theory: rgba(139, 92, 246, 0.08);
+      --bg-practice: rgba(16, 185, 129, 0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
+      
+      --color-theory: #a78bfa;   
+      --color-practice: #34d399;
+      
+      --bg-theory: rgba(167, 139, 250, 0.1);
+      --bg-practice: rgba(52, 211, 153, 0.1);
+    }
+
+    html, body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background: var(--bg-color);
+      color: var(--text-main);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      touch-action: none; /* Блокировка системных жестов */
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* --- СТАРТОВЫЙ ЭКРАН --- */
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--bg-color) 0%, var(--border-color) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      padding: 1.5rem;
+    }
+
+    .splash-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .splash-title {
+      font-size: clamp(1.5rem, 8vw, 3rem);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      max-width: 100%;
+    }
+
+    .splash-subtitle {
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 3rem;
+      max-width: 400px;
+      line-height: 1.5;
+    }
+
+    .start-btn {
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 1rem 2.5rem;
+      border-radius: 99px;
+      font-size: clamp(1.1rem, 4vw, 1.25rem);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+      animation: pulse 2s infinite;
+      transition: transform 0.2s ease;
+    }
+
+    .start-btn:active { transform: scale(0.95); }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+      70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+
+    /* --- ОСНОВНОЙ ИНТЕРФЕЙС --- */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease;
+      position: relative;
+    }
+
+    .app-container.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: transparent;
+      z-index: 10;
+    }
+
+    .progress-info {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 0.4rem 1rem;
+      border-radius: 99px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .theme-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Игровое поле и разделенный фон */
+    .game-board {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg-half {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      z-index: 0;
+    }
+
+    .bg-left {
+      left: 0;
+      background: var(--bg-theory);
+      border-right: 1px dashed var(--color-theory);
+      color: var(--color-theory);
+    }
+
+    .bg-right {
+      right: 0;
+      background: var(--bg-practice);
+      color: var(--color-practice);
+    }
+
+    .bg-icon {
+      width: 48px;
+      height: 48px;
+      fill: currentColor;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .bg-title {
+      font-size: clamp(1rem, 3.5vw, 1.5rem);
+      font-weight: 800;
+      text-transform: uppercase;
+      opacity: 0.3;
+      letter-spacing: 1px;
+    }
+
+    .bg-subtitle {
+      font-size: 0.75rem;
+      font-weight: 600;
+      opacity: 0.3;
+      margin-top: 0.5rem;
+    }
+
+    /* Подсказки направления */
+    .swipe-hint {
+      position: absolute;
+      top: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .swipe-hint svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .hint-left { left: 10px; color: var(--color-theory); }
+    .hint-right { right: 10px; color: var(--color-practice); }
+
+    /* Карточка */
+    .card {
+      position: absolute;
+      width: 280px;
+      height: 380px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: grab;
+      z-index: 10;
+      transform-origin: 50% 100%;
+    }
+
+    .card:active { cursor: grabbing; }
+
+    .card.error {
+      background-color: var(--error) !important;
+      color: white !important;
+      border-color: var(--error) !important;
+    }
+    
+    .card.success {
+      background-color: var(--success) !important;
+      color: white !important;
+      border-color: var(--success) !important;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0) rotate(0); }
+      20% { transform: translate(-10px, 0) rotate(-2deg); }
+      40% { transform: translate(10px, 0) rotate(2deg); }
+      60% { transform: translate(-10px, 0) rotate(-2deg); }
+      80% { transform: translate(10px, 0) rotate(2deg); }
+    }
+    
+    .shake-anim { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+    .card-text-content {
+      font-weight: 500;
+      line-height: 1.4;
+      pointer-events: none;
+      width: 100%;
+    }
+
+    /* Оверлей при свайпе */
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: clamp(1.2rem, 5vw, 1.5rem);
+      font-weight: 800;
+      color: white;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      background: rgba(0,0,0,0.5);
+      padding: 1rem;
+      text-align: center;
+      word-break: break-word;
+    }
+
+    /* Скрытый контейнер для замера текста */
+    #text-measurer {
+      position: absolute;
+      left: -9999px;
+      visibility: hidden;
+      width: 232px; /* 280 - 48 padding */
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* Экран завершения */
+    .end-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 5;
+      background: var(--bg-color);
+    }
+    
+    .end-screen.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @media (min-width: 768px) {
+      .card { width: 340px; height: 460px; }
+      #text-measurer { width: 292px; }
+      .bg-icon { width: 64px; height: 64px; }
+      .swipe-hint { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Библиотека SVG -->
+  <svg style="display: none;">
+    <defs>
+      <symbol id="icon-sun" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18.75a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75zM6.166 17.834a.75.75 0 00-1.06 1.06l1.59 1.591a.75.75 0 101.06-1.061l-1.59-1.59zM4.5 12a.75.75 0 01-.75.75H1.5a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM6.166 6.166a.75.75 0 001.06-1.06l-1.59-1.59a.75.75 0 00-1.061 1.06l1.59 1.59z"/></symbol>
+      <symbol id="icon-moon" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd"/></symbol>
+      <symbol id="icon-theory" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></symbol>
+      <symbol id="icon-practice" viewBox="0 0 24 24"><path d="M12 2c-1.1 0-2 .9-2 2v11.1c-1.8 1.1-3 3-3 5.3 0 3.1 2.7 5.6 6 5.6s6-2.5 6-5.6c0-2.3-1.2-4.2-3-5.3V4c0-1.1-.9-2-2-2zm0 2c.6 0 1 .4 1 1v11c0 .3.1.6.4.8 1.2.7 2 2 2 3.6 0 1.9-1.3 3.6-3.4 3.6s-3.4-1.7-3.4-3.6c0-1.6.8-2.9 2-3.6.3-.2.4-.5.4-.8V5c0-.6.4-1 1-1z"/></symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></symbol>
+      <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></symbol>
+    </defs>
+  </svg>
+
+  <div id="text-measurer"></div>
+
+  <!-- Стартовый экран -->
+  <div id="splash" class="splash-screen">
+    <h1 class="splash-title">МЕТОДЫ ПОЗНАНИЯ</h1>
+    <p class="splash-subtitle">Свайпай влево, если это теория (логика). Свайпай вправо, если это практика (эмпирика).</p>
+    <button id="btn-start" class="start-btn">Начать тренировку</button>
+  </div>
+
+  <!-- Основное приложение -->
+  <div id="app" class="app-container">
+    <header>
+      <div class="progress-info" id="progress-text">Осталось: 0</div>
+      <button class="theme-toggle" id="btn-theme" aria-label="Сменить тему">
+        <svg id="theme-icon"><use href="#icon-moon"></use></svg>
+      </button>
+    </header>
+
+    <div class="game-board" id="board">
+      <!-- Разделенный фон -->
+      <div class="bg-half bg-left">
+        <div class="swipe-hint hint-left"><svg><use href="#icon-arrow-left"></use></svg> Свайп влево</div>
+        <svg class="bg-icon"><use href="#icon-theory"></use></svg>
+        <div class="bg-title">Теоретические<br>методы</div>
+        <div class="bg-subtitle">логика, гипотезы, формулы</div>
+      </div>
+      
+      <div class="bg-half bg-right">
+        <div class="swipe-hint hint-right">Свайп вправо <svg><use href="#icon-arrow-right"></use></svg></div>
+        <svg class="bg-icon"><use href="#icon-practice"></use></svg>
+        <div class="bg-title">Практические<br>(эмпирические)</div>
+        <div class="bg-subtitle">наблюдение, опыт, реальность</div>
+      </div>
+      
+      <!-- Экран победы -->
+      <div class="end-screen" id="end-screen">
+        <h2>Отличная работа!</h2>
+        <p>Вы идеально выучили все методы научного исследования.</p>
+        <button class="start-btn" onclick="location.reload()" style="margin-top: 1rem; animation:none;">Пройти еще раз</button>
+      </div>
+
+      <!-- Карточка (генерируется JS) -->
+    </div>
+  </div>
+
+  <script>
+    // Блокировка системного скролла
+    document.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+
+    // База данных: строго соблюдены правила написания (строчные после двоеточия, среднее тире)
+    const rawData = [
+      // Теоретические
+      { text: 'Формализация: перевод явлений в символы и формулы', answer: 'theory' },
+      { text: 'Анализ: разделение целого на части для более детального изучения', answer: 'theory' },
+      { text: 'Синтез: объединение отдельных элементов в целостную картину', answer: 'theory' },
+      { text: 'Индукция: логический вывод от частного к общему', answer: 'theory' },
+      { text: 'Дедукция: логический вывод от общего к частному', answer: 'theory' },
+      { text: 'Моделирование: создание упрощённой модели объекта для его изучения', answer: 'theory' },
+      { text: 'Выдвижение гипотез: формулирование обоснованных предположений для их дальнейшей проверки', answer: 'theory' },
+      
+      // Практические (Эмпирические)
+      { text: 'Наблюдение: целенаправленное изучение объекта без вмешательства в его естественное состояние', answer: 'practice' },
+      { text: 'Описание: строгая фиксация свойств и особенностей изучаемого явления', answer: 'practice' },
+      { text: 'Измерение: определение количественных параметров объекта с помощью приборов', answer: 'practice' },
+      { text: 'Опрос: сбор данных непосредственно от людей с помощью анкет или интервью', answer: 'practice' },
+      { text: 'Эксперимент: проверка гипотез в искусственно созданных и контролируемых условиях с активным вмешательством', answer: 'practice' },
+      { text: 'Сравнение: поиск сходств и различий между исследуемыми объектами', answer: 'practice' }
+    ];
+
+    let deck = [...rawData].sort(() => Math.random() - 0.5);
+    
+    const splash = document.getElementById('splash');
+    const app = document.getElementById('app');
+    const board = document.getElementById('board');
+    const progressText = document.getElementById('progress-text');
+    const endScreen = document.getElementById('end-screen');
+    const measurer = document.getElementById('text-measurer');
+    
+    let activeCard = null;
+    let isDragging = false;
+    let startX, startY, currentX, currentY;
+
+    // --- Звуковое сопровождение ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSuccessSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // До
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); 
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function playErrorSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.2);
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    // Названия для оверлея
+    const targets = {
+      'theory': { label: 'Теория', color: 'var(--color-theory)' },
+      'practice': { label: 'Практика', color: 'var(--color-practice)' }
+    };
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      initAudio();
+      try {
+        const docEl = document.documentElement;
+        let fs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+        if (fs && typeof fs.call === 'function') {
+          fs.call(docEl).catch(e => console.warn('Fullscreen API:', e));
+        }
+      } catch(e) {}
+
+      splash.classList.add('hidden');
+      setTimeout(() => {
+        splash.style.display = 'none';
+        app.classList.add('visible');
+        createNextCard();
+      }, 500);
+    });
+
+    document.getElementById('btn-theme').addEventListener('click', () => {
+      const html = document.documentElement;
+      const isLight = html.getAttribute('data-theme') === 'light';
+      html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      document.getElementById('theme-icon').innerHTML = `<use href="#icon-${isLight ? 'sun' : 'moon'}"></use>`;
+    });
+
+    // Масштабирование текста (iOS fix)
+    function fitText(element, text) {
+      measurer.textContent = text;
+      let fontSize = window.innerWidth > 768 ? 22 : 18;
+      measurer.style.fontSize = fontSize + 'px';
+      const maxH = window.innerWidth > 768 ? 400 : 320; 
+      
+      while (measurer.scrollHeight > maxH && fontSize > 12) {
+        fontSize -= 0.5;
+        measurer.style.fontSize = fontSize + 'px';
+      }
+      element.style.fontSize = fontSize + 'px';
+      element.textContent = text;
+    }
+
+    function createNextCard() {
+      if (activeCard) {
+        activeCard.remove();
+      }
+      progressText.textContent = `Осталось: ${deck.length}`;
+
+      if (deck.length === 0) {
+        endScreen.classList.add('visible');
+        return;
+      }
+
+      const currentData = deck[0];
+      const el = document.createElement('div');
+      el.className = 'card';
+      
+      const textEl = document.createElement('div');
+      textEl.className = 'card-text-content';
+      
+      const overlay = document.createElement('div');
+      overlay.className = 'card-overlay';
+      
+      el.appendChild(textEl);
+      el.appendChild(overlay);
+      board.appendChild(el);
+      
+      fitText(textEl, currentData.text);
+      
+      activeCard = el;
+      activeCard.dataset.answer = currentData.answer;
+      activeCard.overlay = overlay;
+      
+      initDrag(activeCard);
+    }
+
+    function initDrag(card) {
+      card.addEventListener('mousedown', dragStart);
+      card.addEventListener('touchstart', dragStart, { passive: false });
+    }
+
+    function dragStart(e) {
+      if (e.type === 'touchstart') e.preventDefault();
+      isDragging = true;
+      startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+      activeCard.style.transition = 'none';
+      
+      document.addEventListener('mousemove', dragMove);
+      document.addEventListener('touchmove', dragMove, { passive: false });
+      document.addEventListener('mouseup', dragEnd);
+      document.addEventListener('touchend', dragEnd);
+    }
+
+    function dragMove(e) {
+      if (!isDragging) return;
+      currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+      
+      const dx = currentX - startX;
+      const dy = currentY - startY;
+      const rotate = dx * 0.05;
+      
+      activeCard.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`;
+      
+      // Слева (dx < 0) - Теория, Справа (dx > 0) - Практика
+      let targetKey = dx < 0 ? 'theory' : 'practice';
+
+      // Показываем оверлей только если карточка достаточно сильно сдвинута по оси X
+      if (Math.abs(dx) > 40) {
+        activeCard.overlay.style.opacity = 0.9;
+        activeCard.overlay.textContent = targets[targetKey].label;
+        activeCard.overlay.style.backgroundColor = targets[targetKey].color;
+      } else {
+        activeCard.overlay.style.opacity = 0;
+      }
+    }
+
+    function dragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      
+      document.removeEventListener('mousemove', dragMove);
+      document.removeEventListener('touchmove', dragMove);
+      document.removeEventListener('mouseup', dragEnd);
+      document.removeEventListener('touchend', dragEnd);
+
+      const dx = currentX - startX;
+      const dy = currentY - startY;
+      const threshold = 70; // Пикселей для подтверждения
+      
+      let userChoice = null;
+      
+      // Засчитываем свайп, только если движение было преимущественно горизонтальным
+      if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy)) {
+        userChoice = dx < 0 ? 'theory' : 'practice';
+      }
+
+      if (userChoice) {
+        checkAnswer(userChoice, dx, dy);
+      } else {
+        // Мягкий возврат
+        activeCard.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        activeCard.style.transform = 'translate(0, 0) rotate(0)';
+        activeCard.overlay.style.opacity = 0;
+      }
+    }
+
+    function checkAnswer(choice, dx, dy) {
+      const correctAnswer = activeCard.dataset.answer;
+      
+      if (choice === correctAnswer) {
+        playSuccessSound();
+        activeCard.classList.add('success');
+        activeCard.overlay.textContent = 'ВЕРНО';
+        activeCard.overlay.style.backgroundColor = 'transparent';
+        
+        const offX = dx * 5;
+        const offY = dy * 5;
+        activeCard.style.transition = 'transform 0.4s ease-out, opacity 0.3s';
+        activeCard.style.transform = `translate(${offX}px, ${offY}px) rotate(${dx * 0.1}deg)`;
+        activeCard.style.opacity = 0;
+        
+        deck.shift(); // Удаляем из колоды
+        setTimeout(createNextCard, 300);
+      } else {
+        playErrorSound();
+        activeCard.classList.add('error');
+        activeCard.overlay.textContent = 'ОШИБКА';
+        activeCard.overlay.style.backgroundColor = 'transparent';
+        
+        activeCard.style.transition = 'transform 0.3s';
+        activeCard.style.transform = 'translate(0, 0) rotate(0)';
+        activeCard.classList.add('shake-anim');
+        
+        // Возвращаем в конец колоды
+        const failedCard = deck.shift();
+        deck.push(failedCard);
+        
+        setTimeout(() => {
+          activeCard.classList.remove('error', 'shake-anim');
+          activeCard.overlay.style.opacity = 0;
+          progressText.textContent = `Осталось: ${deck.length} (Перемешано)`;
+        }, 600);
+      }
+    }
+  </script>
+</body>
+</html>
