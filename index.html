@@ -54,7 +54,7 @@
       background: var(--bg-color);
       color: var(--text-main);
       transition: background-color 0.3s ease, color 0.3s ease;
-      touch-action: none; /* Блокировка системных жестов */
+      touch-action: none;
     }
 
     * {
@@ -275,34 +275,64 @@
     .hint-left { left: 10px; color: var(--color-theory); }
     .hint-right { right: 10px; color: var(--color-practice); }
 
-    /* Карточка */
+    /* Карточка с механикой переворота */
     .card {
       position: absolute;
       width: 280px;
       height: 380px;
-      background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
-      text-align: center;
-      cursor: grab;
+      perspective: 1000px;
       z-index: 10;
+      cursor: grab;
       transform-origin: 50% 100%;
     }
 
     .card:active { cursor: grabbing; }
 
-    .card.error {
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden; /* Фикс для iOS Safari */
+      backface-visibility: hidden;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+    }
+
+    /* Состояния успеха и ошибки (перекрашиваем обе стороны карточки) */
+    .card.error .card-face {
       background-color: var(--error) !important;
       color: white !important;
       border-color: var(--error) !important;
     }
     
-    .card.success {
+    .card.success .card-face {
       background-color: var(--success) !important;
       color: white !important;
       border-color: var(--success) !important;
@@ -323,9 +353,38 @@
       line-height: 1.4;
       pointer-events: none;
       width: 100%;
+      margin-bottom: 25px; /* Место под подсказку внизу */
     }
 
-    /* Оверлей при свайпе */
+    .card-back .card-text-content {
+      margin-bottom: 0;
+      font-style: normal;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .flip-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      opacity: 0.7;
+    }
+
+    .flip-hint svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* Оверлей при свайпе (внутри .card, но поверх .card-inner) */
     .card-overlay {
       position: absolute;
       inset: 0;
@@ -344,6 +403,7 @@
       padding: 1rem;
       text-align: center;
       word-break: break-word;
+      z-index: 5;
     }
 
     /* Скрытый контейнер для замера текста */
@@ -396,6 +456,7 @@
       <symbol id="icon-practice" viewBox="0 0 24 24"><path d="M12 2c-1.1 0-2 .9-2 2v11.1c-1.8 1.1-3 3-3 5.3 0 3.1 2.7 5.6 6 5.6s6-2.5 6-5.6c0-2.3-1.2-4.2-3-5.3V4c0-1.1-.9-2-2-2zm0 2c.6 0 1 .4 1 1v11c0 .3.1.6.4.8 1.2.7 2 2 2 3.6 0 1.9-1.3 3.6-3.4 3.6s-3.4-1.7-3.4-3.6c0-1.6.8-2.9 2-3.6.3-.2.4-.5.4-.8V5c0-.6.4-1 1-1z"/></symbol>
       <symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></symbol>
       <symbol id="icon-arrow-right" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></symbol>
+      <symbol id="icon-flip" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></symbol>
     </defs>
   </svg>
 
@@ -404,7 +465,7 @@
   <!-- Стартовый экран -->
   <div id="splash" class="splash-screen">
     <h1 class="splash-title">МЕТОДЫ ПОЗНАНИЯ</h1>
-    <p class="splash-subtitle">Свайпай влево, если это теория (логика). Свайпай вправо, если это практика (эмпирика).</p>
+    <p class="splash-subtitle">Свайпай влево, если это теория (логика). Свайпай вправо, если это практика. Нажми на карточку, чтобы увидеть подсказку!</p>
     <button id="btn-start" class="start-btn">Начать тренировку</button>
   </div>
 
@@ -445,29 +506,80 @@
   </div>
 
   <script>
-    // Блокировка системного скролла
     document.addEventListener('touchmove', function(e) {
       e.preventDefault();
     }, { passive: false });
 
-    // База данных: строго соблюдены правила написания (строчные после двоеточия, среднее тире)
+    // База данных: лицо карточки (определение) и обратная сторона (подсказка/пример)
     const rawData = [
       // Теоретические
-      { text: 'Формализация: перевод явлений в символы и формулы', answer: 'theory' },
-      { text: 'Анализ: разделение целого на части для более детального изучения', answer: 'theory' },
-      { text: 'Синтез: объединение отдельных элементов в целостную картину', answer: 'theory' },
-      { text: 'Индукция: логический вывод от частного к общему', answer: 'theory' },
-      { text: 'Дедукция: логический вывод от общего к частному', answer: 'theory' },
-      { text: 'Моделирование: создание упрощённой модели объекта для его изучения', answer: 'theory' },
-      { text: 'Выдвижение гипотез: формулирование обоснованных предположений для их дальнейшей проверки', answer: 'theory' },
+      { 
+        front: 'Формализация: перевод явлений в символы и формулы', 
+        back: 'Суть: выражение мыслей в точных символах (например, химических уравнениях). Это помогает избежать многозначности обычного языка.',
+        answer: 'theory' 
+      },
+      { 
+        front: 'Анализ: разделение целого на части для более детального изучения', 
+        back: 'Пример: мысленное или фактическое разложение предмета. Например, разбор состава крови на отдельные элементы (эритроциты, плазму и т.д.).',
+        answer: 'theory' 
+      },
+      { 
+        front: 'Синтез: объединение отдельных элементов в целостную картину', 
+        back: 'Суть: обратная анализу процедура. Это сборка разрозненных фактов или данных в единую связную теорию.',
+        answer: 'theory' 
+      },
+      { 
+        front: 'Индукция: логический вывод от частного к общему', 
+        back: 'Пример: от отдельных фактов к правилу. «Железо, медь и золото проводят ток – значит, все металлы проводят ток».',
+        answer: 'theory' 
+      },
+      { 
+        front: 'Дедукция: логический вывод от общего к частному', 
+        back: 'Пример: от правила к факту. «Все люди смертны. Сократ – человек. Значит, он смертен» (любимый метод логики Шерлока Холмса).',
+        answer: 'theory' 
+      },
+      { 
+        front: 'Моделирование: создание упрощённой модели объекта для его изучения', 
+        back: 'Суть: изучение не самого объекта, а его копии. Пример: испытание макета самолета в аэродинамической трубе перед постройкой реального.',
+        answer: 'theory' 
+      },
+      { 
+        front: 'Выдвижение гипотез: формулирование обоснованных предположений для проверки', 
+        back: 'Суть: научное предположение, требующее доказательств. Пример: предположение о том, что жизнь на Землю занесена метеоритами.',
+        answer: 'theory' 
+      },
       
       // Практические (Эмпирические)
-      { text: 'Наблюдение: целенаправленное изучение объекта без вмешательства в его естественное состояние', answer: 'practice' },
-      { text: 'Описание: строгая фиксация свойств и особенностей изучаемого явления', answer: 'practice' },
-      { text: 'Измерение: определение количественных параметров объекта с помощью приборов', answer: 'practice' },
-      { text: 'Опрос: сбор данных непосредственно от людей с помощью анкет или интервью', answer: 'practice' },
-      { text: 'Эксперимент: проверка гипотез в искусственно созданных и контролируемых условиях с активным вмешательством', answer: 'practice' },
-      { text: 'Сравнение: поиск сходств и различий между исследуемыми объектами', answer: 'practice' }
+      { 
+        front: 'Наблюдение: целенаправленное изучение объекта без вмешательства в его естественное состояние', 
+        back: 'Суть: пассивное восприятие. Мы не вмешиваемся в процесс, а только фиксируем то, что происходит само по себе (например, движение звезд).',
+        answer: 'practice' 
+      },
+      { 
+        front: 'Описание: строгая фиксация свойств и особенностей изучаемого явления', 
+        back: 'Суть: запись собранных данных средствами языка (цвет, вес, поведение). Обычно этот метод идет сразу после наблюдения.',
+        answer: 'practice' 
+      },
+      { 
+        front: 'Измерение: определение количественных параметров объекта с помощью приборов', 
+        back: 'Суть: сравнение объекта с неким эталоном (линейкой, весами, термометром). Дает точные числовые (количественные) данные.',
+        answer: 'practice' 
+      },
+      { 
+        front: 'Опрос: сбор данных непосредственно от людей с помощью анкет или интервью', 
+        back: 'Суть: сбор первичной информации от населения. Это главный эмпирический инструмент социологов и политологов перед выборами.',
+        answer: 'practice' 
+      },
+      { 
+        front: 'Эксперимент: проверка гипотез в искусственно созданных и контролируемых условиях с активным вмешательством', 
+        back: 'Суть: активное вмешательство! Ученый сам создает условия для явления, может их менять и многократно повторять процесс.',
+        answer: 'practice' 
+      },
+      { 
+        front: 'Сравнение: поиск сходств и различий между исследуемыми объектами', 
+        back: 'Суть: сопоставление двух и более объектов по выбранному критерию (например, сравнение орудий труда разных исторических эпох).',
+        answer: 'practice' 
+      }
     ];
 
     let deck = [...rawData].sort(() => Math.random() - 0.5);
@@ -481,6 +593,7 @@
     
     let activeCard = null;
     let isDragging = false;
+    let isTap = false;
     let startX, startY, currentX, currentY;
 
     // --- Звуковое сопровождение ---
@@ -501,7 +614,7 @@
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // До
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
       osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); 
       gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
@@ -526,7 +639,6 @@
       osc.stop(audioCtx.currentTime + 0.2);
     }
 
-    // Названия для оверлея
     const targets = {
       'theory': { label: 'Теория', color: 'var(--color-theory)' },
       'practice': { label: 'Практика', color: 'var(--color-practice)' }
@@ -562,7 +674,7 @@
       measurer.textContent = text;
       let fontSize = window.innerWidth > 768 ? 22 : 18;
       measurer.style.fontSize = fontSize + 'px';
-      const maxH = window.innerWidth > 768 ? 400 : 320; 
+      const maxH = window.innerWidth > 768 ? 360 : 280; 
       
       while (measurer.scrollHeight > maxH && fontSize > 12) {
         fontSize -= 0.5;
@@ -584,20 +696,46 @@
       }
 
       const currentData = deck[0];
+      
+      // Структура карточки с переворотом (3D)
       const el = document.createElement('div');
       el.className = 'card';
       
-      const textEl = document.createElement('div');
-      textEl.className = 'card-text-content';
+      const inner = document.createElement('div');
+      inner.className = 'card-inner';
       
+      // Лицевая сторона (Определение)
+      const front = document.createElement('div');
+      front.className = 'card-face card-front';
+      const frontText = document.createElement('div');
+      frontText.className = 'card-text-content';
+      const hint = document.createElement('div');
+      hint.className = 'flip-hint';
+      hint.innerHTML = '<svg><use href="#icon-flip"></use></svg> Тапни для подсказки';
+      front.appendChild(frontText);
+      front.appendChild(hint);
+      
+      // Обратная сторона (Подсказка/Пример)
+      const back = document.createElement('div');
+      back.className = 'card-face card-back';
+      const backText = document.createElement('div');
+      backText.className = 'card-text-content';
+      back.appendChild(backText);
+      
+      inner.appendChild(front);
+      inner.appendChild(back);
+      
+      // Оверлей для свайпа (лежит поверх inner)
       const overlay = document.createElement('div');
       overlay.className = 'card-overlay';
       
-      el.appendChild(textEl);
+      el.appendChild(inner);
       el.appendChild(overlay);
       board.appendChild(el);
       
-      fitText(textEl, currentData.text);
+      // Масштабируем текст для обеих сторон
+      fitText(frontText, currentData.front);
+      fitText(backText, currentData.back);
       
       activeCard = el;
       activeCard.dataset.answer = currentData.answer;
@@ -614,6 +752,7 @@
     function dragStart(e) {
       if (e.type === 'touchstart') e.preventDefault();
       isDragging = true;
+      isTap = true; // Считаем действие тапом, пока не произойдет сильный сдвиг
       startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
       startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
       activeCard.style.transition = 'none';
@@ -631,15 +770,19 @@
       
       const dx = currentX - startX;
       const dy = currentY - startY;
-      const rotate = dx * 0.05;
       
+      // Если палец/мышь сдвинулись больше чем на 5px — это уже не тап, а свайп
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        isTap = false;
+      }
+      
+      const rotate = dx * 0.05;
       activeCard.style.transform = `translate(${dx}px, ${dy}px) rotate(${rotate}deg)`;
       
-      // Слева (dx < 0) - Теория, Справа (dx > 0) - Практика
       let targetKey = dx < 0 ? 'theory' : 'practice';
 
-      // Показываем оверлей только если карточка достаточно сильно сдвинута по оси X
-      if (Math.abs(dx) > 40) {
+      // Показываем оверлей ответа только при значительном сдвиге
+      if (Math.abs(dx) > 40 && !isTap) {
         activeCard.overlay.style.opacity = 0.9;
         activeCard.overlay.textContent = targets[targetKey].label;
         activeCard.overlay.style.backgroundColor = targets[targetKey].color;
@@ -657,13 +800,23 @@
       document.removeEventListener('mouseup', dragEnd);
       document.removeEventListener('touchend', dragEnd);
 
+      // Логика переворота (Тап)
+      if (isTap) {
+        activeCard.classList.toggle('flipped');
+        // Мягко возвращаем карточку в центр, если был микро-сдвиг при клике
+        activeCard.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        activeCard.style.transform = 'translate(0, 0) rotate(0)';
+        activeCard.overlay.style.opacity = 0;
+        return; // Прерываем функцию, чтобы не засчитывать свайп
+      }
+
+      // Логика смахивания (Свайп)
       const dx = currentX - startX;
       const dy = currentY - startY;
-      const threshold = 70; // Пикселей для подтверждения
+      const threshold = 70; 
       
       let userChoice = null;
       
-      // Засчитываем свайп, только если движение было преимущественно горизонтальным
       if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy)) {
         userChoice = dx < 0 ? 'theory' : 'practice';
       }
@@ -671,7 +824,7 @@
       if (userChoice) {
         checkAnswer(userChoice, dx, dy);
       } else {
-        // Мягкий возврат
+        // Мягкий возврат в центр при слабом свайпе
         activeCard.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         activeCard.style.transform = 'translate(0, 0) rotate(0)';
         activeCard.overlay.style.opacity = 0;
@@ -693,7 +846,7 @@
         activeCard.style.transform = `translate(${offX}px, ${offY}px) rotate(${dx * 0.1}deg)`;
         activeCard.style.opacity = 0;
         
-        deck.shift(); // Удаляем из колоды
+        deck.shift(); 
         setTimeout(createNextCard, 300);
       } else {
         playErrorSound();
@@ -705,7 +858,9 @@
         activeCard.style.transform = 'translate(0, 0) rotate(0)';
         activeCard.classList.add('shake-anim');
         
-        // Возвращаем в конец колоды
+        // Убираем переворот, если карточка была перевернута
+        activeCard.classList.remove('flipped');
+        
         const failedCard = deck.shift();
         deck.push(failedCard);
         
