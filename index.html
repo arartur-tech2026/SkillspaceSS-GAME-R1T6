@@ -22,8 +22,8 @@
       --color-theory: #8b5cf6;   /* Фиолетовый */
       --color-practice: #10b981; /* Зеленый */
       
-      --bg-theory: rgba(139, 92, 246, 0.08);
-      --bg-practice: rgba(16, 185, 129, 0.08);
+      --bg-theory: rgba(139, 92, 246, 0.18);
+      --bg-practice: rgba(16, 185, 129, 0.18);
     }
 
     [data-theme="dark"] {
@@ -38,8 +38,8 @@
       --color-theory: #a78bfa;   
       --color-practice: #34d399;
       
-      --bg-theory: rgba(167, 139, 250, 0.1);
-      --bg-practice: rgba(52, 211, 153, 0.1);
+      --bg-theory: rgba(167, 139, 250, 0.22);
+      --bg-practice: rgba(52, 211, 153, 0.22);
     }
 
     html, body {
@@ -207,7 +207,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 1rem;
+      padding: 1rem 0.5rem;
       z-index: 0;
     }
 
@@ -229,22 +229,28 @@
       height: 48px;
       fill: currentColor;
       margin-bottom: 1rem;
-      opacity: 0.3;
+      opacity: 0.6;
     }
 
     .bg-title {
-      font-size: clamp(1rem, 3.5vw, 1.5rem);
+      font-size: clamp(0.9rem, 4vw, 1.5rem);
       font-weight: 800;
       text-transform: uppercase;
-      opacity: 0.3;
+      opacity: 0.6;
       letter-spacing: 1px;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      line-height: 1.2;
     }
 
     .bg-subtitle {
-      font-size: 0.75rem;
+      font-size: clamp(0.7rem, 2.5vw, 0.85rem);
       font-weight: 600;
-      opacity: 0.3;
+      opacity: 0.6;
       margin-top: 0.5rem;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     /* Подсказки направления */
